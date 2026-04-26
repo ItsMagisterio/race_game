@@ -53,13 +53,46 @@ public class SceneService {
                 }
             }
 
-            if (best != null && best.getHitNormalLocal() != null && best.getHitNormalLocal().y > 0.92f) {
+            if (best != null && best.getHitNormalLocal() != null && best.getHitNormalLocal().y > 0.97f) {
                 Vector3f point = from.interpolateLocal(to, best.getHitFraction());
-                return point.add(0f, 2.6f, 0f);
+                Vector3f spawn = point.add(0f, 2.6f, 0f);
+                if (isSpawnSafe(physicsSpace, spawn)) {
+                    return spawn;
+                }
             }
         }
 
         return new Vector3f(0f, 8f, 0f);
+    }
+
+
+    private boolean isSpawnSafe(PhysicsSpace physicsSpace, Vector3f spawn) {
+        float minClearance = 14f;
+        float rayHeight = spawn.y + 0.6f;
+
+        Vector3f[] directions = new Vector3f[]{
+                new Vector3f(1, 0, 0),
+                new Vector3f(-1, 0, 0),
+                new Vector3f(0, 0, 1),
+                new Vector3f(0, 0, -1),
+                new Vector3f(1, 0, 1).nor(),
+                new Vector3f(-1, 0, 1).nor(),
+                new Vector3f(1, 0, -1).nor(),
+                new Vector3f(-1, 0, -1).nor()
+        };
+
+        Vector3f origin = new Vector3f(spawn.x, rayHeight, spawn.z);
+
+        for (Vector3f dir : directions) {
+            Vector3f end = origin.add(dir.mult(minClearance, new Vector3f()));
+            for (PhysicsRayTestResult hit : physicsSpace.rayTest(origin, end)) {
+                if (hit.getHitFraction() > 0.01f && hit.getHitFraction() < 0.98f) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void addLights(Node rootNode) {
