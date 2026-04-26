@@ -16,12 +16,12 @@ import com.racegame.model.CarState;
 
 public class CarService {
 
-    private static final float CAR_MASS = 1200f;
-    private static final float ENGINE_FORCE = 9000f;
-    private static final float BRAKE_FORCE = 14000f;
-    private static final float REVERSE_FORCE = 5400f;
-    private static final float NITRO_MULTIPLIER = 1.8f;
-    private static final float TURN_TORQUE = 2600f;
+    private static final float CAR_MASS = 1050f;
+    private static final float ENGINE_FORCE = 14000f;
+    private static final float BRAKE_FORCE = 17000f;
+    private static final float REVERSE_FORCE = 7000f;
+    private static final float NITRO_MULTIPLIER = 2.2f;
+    private static final float TURN_TORQUE = 4200f;
 
     private RigidBodyControl carBody;
 
@@ -48,8 +48,9 @@ public class CarService {
         rootNode.attachChild(carNode);
 
         carBody = new RigidBodyControl(new BoxCollisionShape(new Vector3f(1.0f, 0.55f, 2.2f)), CAR_MASS);
-        carBody.setDamping(0.2f, 0.85f);
-        carBody.setAngularFactor(0.35f);
+        carBody.setDamping(0.12f, 0.65f);
+        carBody.setFriction(1.7f);
+        carBody.setAngularFactor(0.55f);
         carNode.addControl(carBody);
         physicsSpace.add(carBody);
 
@@ -87,7 +88,7 @@ public class CarService {
 
         if (!state.isAccelerating() && !state.isReversing() && !state.isBraking()) {
             Vector3f vel = carBody.getLinearVelocity();
-            carBody.setLinearVelocity(new Vector3f(vel.x * 0.995f, vel.y, vel.z * 0.995f));
+            carBody.setLinearVelocity(new Vector3f(vel.x * 0.992f, vel.y, vel.z * 0.992f));
         }
 
         if (Math.abs(signedSpeed) > 2f) {

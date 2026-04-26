@@ -20,8 +20,10 @@ public class InputService implements ActionListener {
         inputManager.addMapping("SteerRight", new KeyTrigger(KeyInput.KEY_D));
         inputManager.addMapping("Nitro", new KeyTrigger(KeyInput.KEY_LSHIFT), new KeyTrigger(KeyInput.KEY_RSHIFT));
         inputManager.addMapping("Brake", new KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("CameraUp", new KeyTrigger(KeyInput.KEY_Q));
+        inputManager.addMapping("CameraDown", new KeyTrigger(KeyInput.KEY_E));
 
-        inputManager.addListener(this, "Forward", "Reverse", "SteerLeft", "SteerRight", "Nitro", "Brake");
+        inputManager.addListener(this, "Forward", "Reverse", "SteerLeft", "SteerRight", "Nitro", "Brake", "CameraUp", "CameraDown");
     }
 
     @Override
@@ -33,6 +35,8 @@ public class InputService implements ActionListener {
             case "Nitro" -> state.setNitro(isPressed);
             case "SteerLeft" -> state.setSteerLeft(isPressed);
             case "SteerRight" -> state.setSteerRight(isPressed);
+            case "CameraUp" -> state.setCameraUp(isPressed);
+            case "CameraDown" -> state.setCameraDown(isPressed);
             default -> {
             }
         }

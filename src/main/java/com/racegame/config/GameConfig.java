@@ -11,7 +11,9 @@ public final class GameConfig {
     public static final float BASE_STEER_SPEED = 1.9f;
 
     public static final float CAR_Y = 0.6f;
-    public static final float CAMERA_LERP = 5f;
+    public static final float CAMERA_LERP = 7.5f;
+    public static final float CAMERA_HEIGHT_MIN = 2.0f;
+    public static final float CAMERA_HEIGHT_MAX = 12.0f;
 
     public static final float UI_BASE_WIDTH = 1920f;
     public static final float UI_BASE_HEIGHT = 1080f;

@@ -2,18 +2,19 @@ package com.racegame.service;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-
 import com.racegame.config.GameConfig;
 
-import java.util.Locale;
-
 public class HudService {
-    private BitmapText speedText;
+    private Node needlePivot;
 
     public void initialize(AssetManager assetManager, BitmapFont guiFont, Node guiNode, int width, int height) {
         Picture speedometer = new Picture("speedometer");
@@ -22,21 +23,45 @@ public class HudService {
 
         float uiScale = Math.min(width / GameConfig.UI_BASE_WIDTH, height / GameConfig.UI_BASE_HEIGHT);
         float size = GameConfig.HUD_SIZE * uiScale;
+        float x = 35f * uiScale;
+        float y = 35f * uiScale;
+
         speedometer.setWidth(size);
         speedometer.setHeight(size);
-        speedometer.setPosition(35f * uiScale, 35f * uiScale);
+        speedometer.setPosition(x, y);
         guiNode.attachChild(speedometer);
 
-        speedText = new BitmapText(guiFont);
-        speedText.setSize(guiFont.getCharSet().getRenderedSize() * (2.1f * uiScale));
-        speedText.setColor(ColorRGBA.White);
-        speedText.setLocalTranslation(110f * uiScale, 120f * uiScale, 1f);
-        guiNode.attachChild(speedText);
+        float centerX = x + size * 0.5f;
+        float centerY = y + size * 0.37f;
+
+        needlePivot = new Node("needle-pivot");
+        needlePivot.setLocalTranslation(centerX, centerY, 2f);
+
+        float needleW = 6f * uiScale;
+        float needleL = 88f * uiScale;
+        Geometry needle = new Geometry("needle", new Quad(needleL, needleW));
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Red);
+        needle.setMaterial(mat);
+        needle.setLocalTranslation(0f, -needleW / 2f, 0f);
+
+        needlePivot.attachChild(needle);
+        guiNode.attachChild(needlePivot);
+
+        updateSpeed(0f);
     }
 
     public void updateSpeed(float speedKmh) {
-        if (speedText != null) {
-            speedText.setText(String.format(Locale.US, "%03d km/h", Math.round(Math.abs(speedKmh))));
+        if (needlePivot == null) {
+            return;
         }
+
+        float clamped = FastMath.clamp(speedKmh, 0f, 260f);
+        float t = clamped / 260f;
+        float minAngle = FastMath.DEG_TO_RAD * -140f;
+        float maxAngle = FastMath.DEG_TO_RAD * 45f;
+        float angle = minAngle + (maxAngle - minAngle) * t;
+
+        needlePivot.setLocalRotation(new Quaternion().fromAngleAxis(angle, com.jme3.math.Vector3f.UNIT_Z));
     }
 }

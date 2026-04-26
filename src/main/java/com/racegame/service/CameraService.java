@@ -6,14 +6,24 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.racegame.config.GameConfig;
+import com.racegame.model.CarState;
 
 public class CameraService {
 
-    public void updateFollowCamera(Camera cam, Node carNode, float tpf) {
+    public void updateFollowCamera(Camera cam, Node carNode, CarState state, float tpf) {
+        float height = state.getCameraHeightOffset();
+        if (state.isCameraUp()) {
+            height += 6f * tpf;
+        }
+        if (state.isCameraDown()) {
+            height -= 6f * tpf;
+        }
+        state.setCameraHeightOffset(FastMath.clamp(height, GameConfig.CAMERA_HEIGHT_MIN, GameConfig.CAMERA_HEIGHT_MAX));
+
         Vector3f target = carNode.getWorldTranslation();
         Quaternion rot = carNode.getWorldRotation();
 
-        Vector3f behind = rot.mult(new Vector3f(0f, 4.5f, -11f));
+        Vector3f behind = rot.mult(new Vector3f(0f, state.getCameraHeightOffset(), -12f));
         Vector3f desired = target.add(behind);
 
         Vector3f current = cam.getLocation();

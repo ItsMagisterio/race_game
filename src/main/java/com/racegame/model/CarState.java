@@ -8,6 +8,9 @@ public class CarState {
     private boolean nitro;
     private boolean steerLeft;
     private boolean steerRight;
+    private boolean cameraUp;
+    private boolean cameraDown;
+    private float cameraHeightOffset = 4.5f;
 
     public float getSpeedKmh() { return speedKmh; }
     public void setSpeedKmh(float speedKmh) { this.speedKmh = speedKmh; }
@@ -29,4 +32,13 @@ public class CarState {
 
     public boolean isSteerRight() { return steerRight; }
     public void setSteerRight(boolean steerRight) { this.steerRight = steerRight; }
+
+    public boolean isCameraUp() { return cameraUp; }
+    public void setCameraUp(boolean cameraUp) { this.cameraUp = cameraUp; }
+
+    public boolean isCameraDown() { return cameraDown; }
+    public void setCameraDown(boolean cameraDown) { this.cameraDown = cameraDown; }
+
+    public float getCameraHeightOffset() { return cameraHeightOffset; }
+    public void setCameraHeightOffset(float cameraHeightOffset) { this.cameraHeightOffset = cameraHeightOffset; }
 }
