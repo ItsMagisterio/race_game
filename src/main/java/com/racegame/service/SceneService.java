@@ -19,6 +19,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
+import com.racegame.config.GameConfig;
 
 public class SceneService {
 
@@ -33,10 +34,14 @@ public class SceneService {
     public Vector3f findSpawnPoint(PhysicsSpace physicsSpace) {
         Vector3f[] candidates = new Vector3f[]{
                 new Vector3f(0f, 120f, 0f),
-                new Vector3f(25f, 120f, 25f),
-                new Vector3f(-25f, 120f, -25f),
-                new Vector3f(40f, 120f, -40f),
-                new Vector3f(-40f, 120f, 40f)
+                new Vector3f(50f, 120f, 50f),
+                new Vector3f(-50f, 120f, -50f),
+                new Vector3f(90f, 120f, -90f),
+                new Vector3f(-90f, 120f, 90f),
+                new Vector3f(140f, 120f, 0f),
+                new Vector3f(0f, 120f, 140f),
+                new Vector3f(-140f, 120f, 0f),
+                new Vector3f(0f, 120f, -140f)
         };
 
         for (Vector3f from : candidates) {
@@ -70,7 +75,12 @@ public class SceneService {
 
     private void loadTrackWithPhysics(AssetManager assetManager, Node rootNode, PhysicsSpace physicsSpace) {
         try {
-            Spatial track = assetManager.loadModel("race_track.glb");
+            Spatial track;
+            try {
+                track = assetManager.loadModel(GameConfig.TRACK_PRIMARY);
+            } catch (Exception ignored) {
+                track = assetManager.loadModel(GameConfig.TRACK_FALLBACK);
+            }
             adaptPbrToLighting(track, assetManager);
             track.setLocalScale(1f);
             track.setShadowMode(RenderQueue.ShadowMode.Receive);

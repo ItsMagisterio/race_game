@@ -44,7 +44,11 @@ public class RacingGame extends ApplicationAdapter {
         env.add(new DirectionalLight().set(1f, 1f, 1f, -0.4f, -1f, 0.25f));
         sceneManager.setAmbientLight(0.7f);
 
-        trackAsset = new GLBLoader().load(Gdx.files.absolute("race_track.glb"));
+        try {
+            trackAsset = new GLBLoader().load(Gdx.files.absolute("drift_race_track.glb"));
+        } catch (Exception ex) {
+            trackAsset = new GLBLoader().load(Gdx.files.absolute("race_track.glb"));
+        }
         Scene trackScene = new Scene(trackAsset.scene);
         sceneManager.addScene(trackScene);
 

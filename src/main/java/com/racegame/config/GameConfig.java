@@ -18,4 +18,7 @@ public final class GameConfig {
     public static final float UI_BASE_WIDTH = 1920f;
     public static final float UI_BASE_HEIGHT = 1080f;
     public static final float HUD_SIZE = 260f;
+
+    public static final String TRACK_PRIMARY = "drift_race_track.glb";
+    public static final String TRACK_FALLBACK = "race_track.glb";
 }

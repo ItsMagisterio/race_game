@@ -2,7 +2,7 @@
 
 Мини-игра в духе **Need for Speed Underground** на Java с твоими ассетами:
 - `bmw_racing_car.glb` — машина
-- `race_track.glb` — трасса
+- `drift_race_track.glb` — новая основная трасса (fallback: `race_track.glb`)
 - `speedometer-car-tachometer.png` — HUD-спидометр
 
 ## Архитектура (не монолит)
