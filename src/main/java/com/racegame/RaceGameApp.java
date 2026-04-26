@@ -1,6 +1,7 @@
 package com.racegame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.system.AppSettings;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -25,6 +26,7 @@ public class RaceGameApp extends SimpleApplication {
 
     private Node carNode;
     private boolean hudReady;
+    private BulletAppState bulletAppState;
 
     public static void main(String[] args) {
         RaceGameApp app = new RaceGameApp();
@@ -45,9 +47,12 @@ public class RaceGameApp extends SimpleApplication {
         setDisplayStatView(false);
         setDisplayFps(false);
 
-        sceneService.initializeScene(assetManager, rootNode, viewPort);
+        bulletAppState = new BulletAppState();
+        stateManager.attach(bulletAppState);
+
+        sceneService.initializeScene(assetManager, rootNode, viewPort, bulletAppState.getPhysicsSpace());
         cam.setFrustumFar(5000f);
-        carNode = carService.createCar(assetManager, rootNode);
+        carNode = carService.createCar(assetManager, rootNode, bulletAppState.getPhysicsSpace());
 
         InputService inputService = new InputService(carState);
         inputService.register(inputManager);

@@ -2,6 +2,9 @@ package com.racegame.service;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.MatParam;
@@ -18,11 +21,11 @@ import com.jme3.texture.Texture;
 
 public class SceneService {
 
-    public void initializeScene(AssetManager assetManager, Node rootNode, ViewPort viewPort) {
+    public void initializeScene(AssetManager assetManager, Node rootNode, ViewPort viewPort, PhysicsSpace physicsSpace) {
         viewPort.setBackgroundColor(new ColorRGBA(0.53f, 0.79f, 0.98f, 1f));
         assetManager.registerLocator(".", FileLocator.class);
         addLights(rootNode);
-        loadTrackWithFallback(assetManager, rootNode);
+        loadTrackWithPhysics(assetManager, rootNode, physicsSpace);
     }
 
     private void addLights(Node rootNode) {
@@ -36,13 +39,17 @@ public class SceneService {
         rootNode.addLight(ambient);
     }
 
-    private void loadTrackWithFallback(AssetManager assetManager, Node rootNode) {
+    private void loadTrackWithPhysics(AssetManager assetManager, Node rootNode, PhysicsSpace physicsSpace) {
         try {
             Spatial track = assetManager.loadModel("race_track.glb");
             adaptPbrToLighting(track, assetManager);
             track.setLocalScale(1f);
             track.setShadowMode(RenderQueue.ShadowMode.Receive);
             rootNode.attachChild(track);
+
+            RigidBodyControl trackBody = new RigidBodyControl(CollisionShapeFactory.createMeshShape(track), 0f);
+            track.addControl(trackBody);
+            physicsSpace.add(trackBody);
         } catch (Exception ex) {
             Geometry fallbackGround = new Geometry("fallback-ground", new Box(200f, 0.1f, 200f));
             Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
@@ -51,6 +58,10 @@ public class SceneService {
             mat.setColor("Ambient", new ColorRGBA(0.1f, 0.2f, 0.1f, 1f));
             fallbackGround.setMaterial(mat);
             rootNode.attachChild(fallbackGround);
+
+            RigidBodyControl groundBody = new RigidBodyControl(CollisionShapeFactory.createMeshShape(fallbackGround), 0f);
+            fallbackGround.addControl(groundBody);
+            physicsSpace.add(groundBody);
         }
     }
 
@@ -62,18 +73,10 @@ public class SceneService {
             return;
         }
 
-        if (!(spatial instanceof Geometry geometry)) {
-            return;
-        }
-
+        if (!(spatial instanceof Geometry geometry)) return;
         Material original = geometry.getMaterial();
-        if (original == null) {
-            return;
-        }
-
-        if (!"Common/MatDefs/Light/PBRLighting.j3md".equals(original.getMaterialDef().getAssetName())) {
-            return;
-        }
+        if (original == null) return;
+        if (!"Common/MatDefs/Light/PBRLighting.j3md".equals(original.getMaterialDef().getAssetName())) return;
 
         Material lit = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         lit.setBoolean("UseMaterialColors", true);

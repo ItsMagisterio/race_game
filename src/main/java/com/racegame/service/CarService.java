@@ -1,6 +1,9 @@
 package com.racegame.service;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -13,7 +16,14 @@ import com.racegame.model.CarState;
 
 public class CarService {
 
-    public Node createCar(AssetManager assetManager, Node rootNode) {
+    private static final float CAR_MASS = 1200f;
+    private static final float ENGINE_FORCE = 9000f;
+    private static final float BRAKE_FORCE = 12000f;
+    private static final float TURN_TORQUE = 2600f;
+
+    private RigidBodyControl carBody;
+
+    public Node createCar(AssetManager assetManager, Node rootNode, PhysicsSpace physicsSpace) {
         Node carNode = new Node("player-car");
         Spatial carModel;
 
@@ -32,44 +42,59 @@ public class CarService {
         }
 
         carNode.attachChild(carModel);
-        carNode.setLocalTranslation(0f, GameConfig.CAR_Y + 1.2f, 0f);
+        carNode.setLocalTranslation(0f, GameConfig.CAR_Y + 2.2f, 0f);
         rootNode.attachChild(carNode);
+
+        carBody = new RigidBodyControl(new BoxCollisionShape(new Vector3f(1.0f, 0.55f, 2.2f)), CAR_MASS);
+        carBody.setDamping(0.2f, 0.85f);
+        carBody.setAngularFactor(new Vector3f(0f, 1f, 0f));
+        carNode.addControl(carBody);
+        physicsSpace.add(carBody);
+
         return carNode;
     }
 
     public void updateSpeed(CarState state, float tpf) {
-        float speed = state.getSpeedKmh();
-
-        if (state.isAccelerating()) {
-            speed += GameConfig.ACCELERATION * tpf;
-        } else if (state.isBraking()) {
-            speed -= (speed > 0f ? GameConfig.BRAKE_ACCELERATION : GameConfig.ACCELERATION) * tpf;
-        } else {
-            float sign = Math.signum(speed);
-            float decay = GameConfig.NATURAL_DECELERATION * tpf;
-            speed = Math.abs(speed) <= decay ? 0f : speed - decay * sign;
+        if (carBody == null) {
+            state.setSpeedKmh(0f);
+            return;
         }
-
-        state.setSpeedKmh(FastMath.clamp(speed, GameConfig.MAX_REVERSE_SPEED, GameConfig.MAX_FORWARD_SPEED));
+        state.setSpeedKmh(carBody.getLinearVelocity().length() * 3.6f);
     }
 
     public void updateCarMovement(Node carNode, CarState state, float tpf) {
-        float steerInput = (state.isSteerLeft() ? 1f : 0f) + (state.isSteerRight() ? -1f : 0f);
+        if (carBody == null) return;
+
+        Vector3f forward = carNode.getWorldRotation().mult(Vector3f.UNIT_Z).setY(0f).normalizeLocal();
+
         float speedKmh = state.getSpeedKmh();
+        float signedSpeed = carBody.getLinearVelocity().dot(forward) * 3.6f;
 
-        float speedFactor = FastMath.clamp(Math.abs(speedKmh) / GameConfig.MAX_FORWARD_SPEED, 0.2f, 1f);
-        float steerAmount = steerInput * GameConfig.BASE_STEER_SPEED * speedFactor * tpf;
-        if (speedKmh < 0f) {
-            steerAmount *= -0.75f;
+        if (state.isAccelerating() && signedSpeed < GameConfig.MAX_FORWARD_SPEED) {
+            carBody.applyCentralForce(forward.mult(ENGINE_FORCE));
         }
-        carNode.rotate(0f, steerAmount, 0f);
 
-        Vector3f forward = carNode.getLocalRotation().mult(Vector3f.UNIT_Z).normalizeLocal();
-        float metersPerSecond = speedKmh / 3.6f;
-        Vector3f movement = forward.mult(metersPerSecond * tpf);
-        carNode.move(movement.x, 0f, movement.z);
+        if (state.isBraking()) {
+            if (signedSpeed > 2f) {
+                carBody.applyCentralForce(forward.negate().mult(BRAKE_FORCE));
+            } else if (signedSpeed > GameConfig.MAX_REVERSE_SPEED) {
+                carBody.applyCentralForce(forward.negate().mult(ENGINE_FORCE * 0.6f));
+            }
+        }
 
-        Vector3f p = carNode.getLocalTranslation();
-        carNode.setLocalTranslation(p.x, GameConfig.CAR_Y + 1.2f, p.z);
+        if (!state.isAccelerating() && !state.isBraking()) {
+            Vector3f vel = carBody.getLinearVelocity();
+            carBody.setLinearVelocity(new Vector3f(vel.x * 0.995f, vel.y, vel.z * 0.995f));
+        }
+
+        if (Math.abs(speedKmh) > 2f) {
+            float steer = 0f;
+            if (state.isSteerLeft()) steer += 1f;
+            if (state.isSteerRight()) steer -= 1f;
+            if (steer != 0f) {
+                float speedFactor = FastMath.clamp(speedKmh / GameConfig.MAX_FORWARD_SPEED, 0.25f, 1f);
+                carBody.applyTorque(new Vector3f(0f, TURN_TORQUE * steer * speedFactor, 0f));
+            }
+        }
     }
 }
