@@ -5,7 +5,7 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
-import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 
 import java.util.Locale;
@@ -15,7 +15,7 @@ public class HudService {
 
     public void initialize(AssetManager assetManager, BitmapFont guiFont, Node guiNode) {
         Picture speedometer = new Picture("speedometer");
-        Texture texture = assetManager.loadTexture("speedometer-car-tachometer.png");
+        Texture2D texture = (Texture2D) assetManager.loadTexture("speedometer-car-tachometer.png");
         speedometer.setTexture(assetManager, texture, true);
 
         float size = 260f;
