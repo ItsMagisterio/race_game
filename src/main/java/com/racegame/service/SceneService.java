@@ -4,6 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
+import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -13,6 +14,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.texture.Texture;
 
 public class SceneService {
 
@@ -37,6 +39,7 @@ public class SceneService {
     private void loadTrackWithFallback(AssetManager assetManager, Node rootNode) {
         try {
             Spatial track = assetManager.loadModel("race_track.glb");
+            adaptPbrToLighting(track, assetManager);
             track.setLocalScale(1f);
             track.setShadowMode(RenderQueue.ShadowMode.Receive);
             rootNode.attachChild(track);
@@ -49,5 +52,39 @@ public class SceneService {
             fallbackGround.setMaterial(mat);
             rootNode.attachChild(fallbackGround);
         }
+    }
+
+    private void adaptPbrToLighting(Spatial spatial, AssetManager assetManager) {
+        if (spatial instanceof Node node) {
+            for (Spatial child : node.getChildren()) {
+                adaptPbrToLighting(child, assetManager);
+            }
+            return;
+        }
+
+        if (!(spatial instanceof Geometry geometry)) {
+            return;
+        }
+
+        Material original = geometry.getMaterial();
+        if (original == null) {
+            return;
+        }
+
+        if (!"Common/MatDefs/Light/PBRLighting.j3md".equals(original.getMaterialDef().getAssetName())) {
+            return;
+        }
+
+        Material lit = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        lit.setBoolean("UseMaterialColors", true);
+        lit.setColor("Diffuse", ColorRGBA.White);
+        lit.setColor("Ambient", ColorRGBA.White.mult(0.8f));
+
+        MatParam baseMapParam = original.getParam("BaseColorMap");
+        if (baseMapParam != null && baseMapParam.getValue() instanceof Texture texture) {
+            lit.setTexture("DiffuseMap", texture);
+        }
+
+        geometry.setMaterial(lit);
     }
 }

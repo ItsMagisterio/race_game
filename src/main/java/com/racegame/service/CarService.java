@@ -20,6 +20,7 @@ public class CarService {
         try {
             carModel = assetManager.loadModel("bmw_racing_car.glb");
             carModel.setLocalScale(1f);
+            carModel.rotate(0f, -FastMath.HALF_PI, 0f);
         } catch (Exception ex) {
             Geometry fallbackCar = new Geometry("fallback-car", new Box(1.2f, 0.6f, 2.4f));
             Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
@@ -63,7 +64,7 @@ public class CarService {
         }
         carNode.rotate(0f, steerAmount, 0f);
 
-        Vector3f forward = carNode.getLocalRotation().mult(Vector3f.UNIT_X).normalizeLocal();
+        Vector3f forward = carNode.getLocalRotation().mult(Vector3f.UNIT_Z).normalizeLocal();
         float metersPerSecond = speedKmh / 3.6f;
         Vector3f movement = forward.mult(metersPerSecond * tpf);
         carNode.move(movement.x, 0f, movement.z);
