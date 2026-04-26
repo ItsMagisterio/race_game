@@ -14,7 +14,6 @@ public class CarService {
         Node carNode = new Node("player-car");
         Spatial carModel = assetManager.loadModel("bmw_racing_car.glb");
         carModel.setLocalScale(1f);
-        carModel.rotate(0, FastMath.PI, 0);
 
         carNode.attachChild(carModel);
         carNode.setLocalTranslation(0f, GameConfig.CAR_Y, 0f);
@@ -49,7 +48,7 @@ public class CarService {
         }
         carNode.rotate(0f, steerAmount, 0f);
 
-        Vector3f forward = carNode.getLocalRotation().mult(Vector3f.UNIT_Z).normalizeLocal();
+        Vector3f forward = carNode.getLocalRotation().mult(Vector3f.UNIT_X).normalizeLocal();
         float metersPerSecond = speedKmh / 3.6f;
         Vector3f movement = forward.mult(metersPerSecond * tpf);
         carNode.move(movement.x, 0f, movement.z);

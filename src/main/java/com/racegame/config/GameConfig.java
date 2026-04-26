@@ -12,4 +12,8 @@ public final class GameConfig {
 
     public static final float CAR_Y = 0.6f;
     public static final float CAMERA_LERP = 5f;
+
+    public static final float UI_BASE_WIDTH = 1920f;
+    public static final float UI_BASE_HEIGHT = 1080f;
+    public static final float HUD_SIZE = 260f;
 }

@@ -34,6 +34,11 @@
             <artifactId>jme3-plugins</artifactId>
             <version>${jme.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jmonkeyengine</groupId>
+            <artifactId>jme3-plugins-json</artifactId>
+            <version>${jme.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
