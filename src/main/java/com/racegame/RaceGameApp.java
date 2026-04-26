@@ -24,6 +24,7 @@ public class RaceGameApp extends SimpleApplication {
     private final HudService hudService = new HudService();
 
     private Node carNode;
+    private boolean hudReady;
 
     public static void main(String[] args) {
         RaceGameApp app = new RaceGameApp();
@@ -52,6 +53,7 @@ public class RaceGameApp extends SimpleApplication {
         inputService.register(inputManager);
 
         hudService.initialize(assetManager, guiFont, guiNode, cam.getWidth(), cam.getHeight());
+        hudReady = true;
 
         flyCam.setEnabled(false);
         cam.setLocation(new Vector3f(0, 5, -12));
@@ -69,6 +71,11 @@ public class RaceGameApp extends SimpleApplication {
     @Override
     public void reshape(int w, int h) {
         super.reshape(w, h);
+
+        if (!hudReady || assetManager == null || guiFont == null || guiNode == null) {
+            return;
+        }
+
         guiNode.detachAllChildren();
         hudService.initialize(assetManager, guiFont, guiNode, w, h);
     }
