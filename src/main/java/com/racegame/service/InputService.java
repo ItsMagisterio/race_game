@@ -14,18 +14,23 @@ public class InputService implements ActionListener {
     }
 
     public void register(InputManager inputManager) {
-        inputManager.addMapping("Accelerate", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP));
-        inputManager.addMapping("Brake", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
-        inputManager.addMapping("SteerLeft", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
-        inputManager.addMapping("SteerRight", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
-        inputManager.addListener(this, "Accelerate", "Brake", "SteerLeft", "SteerRight");
+        inputManager.addMapping("Forward", new KeyTrigger(KeyInput.KEY_W));
+        inputManager.addMapping("Reverse", new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("SteerLeft", new KeyTrigger(KeyInput.KEY_A));
+        inputManager.addMapping("SteerRight", new KeyTrigger(KeyInput.KEY_D));
+        inputManager.addMapping("Nitro", new KeyTrigger(KeyInput.KEY_LSHIFT), new KeyTrigger(KeyInput.KEY_RSHIFT));
+        inputManager.addMapping("Brake", new KeyTrigger(KeyInput.KEY_SPACE));
+
+        inputManager.addListener(this, "Forward", "Reverse", "SteerLeft", "SteerRight", "Nitro", "Brake");
     }
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
         switch (name) {
-            case "Accelerate" -> state.setAccelerating(isPressed);
+            case "Forward" -> state.setAccelerating(isPressed);
+            case "Reverse" -> state.setReversing(isPressed);
             case "Brake" -> state.setBraking(isPressed);
+            case "Nitro" -> state.setNitro(isPressed);
             case "SteerLeft" -> state.setSteerLeft(isPressed);
             case "SteerRight" -> state.setSteerRight(isPressed);
             default -> {

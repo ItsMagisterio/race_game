@@ -18,7 +18,9 @@ public class CarService {
 
     private static final float CAR_MASS = 1200f;
     private static final float ENGINE_FORCE = 9000f;
-    private static final float BRAKE_FORCE = 12000f;
+    private static final float BRAKE_FORCE = 14000f;
+    private static final float REVERSE_FORCE = 5400f;
+    private static final float NITRO_MULTIPLIER = 1.8f;
     private static final float TURN_TORQUE = 2600f;
 
     private RigidBodyControl carBody;
@@ -66,34 +68,36 @@ public class CarService {
         if (carBody == null) return;
 
         Vector3f forward = carNode.getWorldRotation().mult(Vector3f.UNIT_Z).setY(0f).normalizeLocal();
-
-        float speedKmh = state.getSpeedKmh();
         float signedSpeed = carBody.getLinearVelocity().dot(forward) * 3.6f;
 
-        if (state.isAccelerating() && signedSpeed < GameConfig.MAX_FORWARD_SPEED) {
-            carBody.applyCentralForce(forward.mult(ENGINE_FORCE));
+        float driveForce = state.isNitro() ? ENGINE_FORCE * NITRO_MULTIPLIER : ENGINE_FORCE;
+
+        if (state.isAccelerating() && signedSpeed < GameConfig.MAX_FORWARD_SPEED * (state.isNitro() ? 1.35f : 1f)) {
+            carBody.applyCentralForce(forward.mult(driveForce));
+        }
+
+        if (state.isReversing() && signedSpeed > GameConfig.MAX_REVERSE_SPEED) {
+            carBody.applyCentralForce(forward.negate().mult(REVERSE_FORCE));
         }
 
         if (state.isBraking()) {
-            if (signedSpeed > 2f) {
-                carBody.applyCentralForce(forward.negate().mult(BRAKE_FORCE));
-            } else if (signedSpeed > GameConfig.MAX_REVERSE_SPEED) {
-                carBody.applyCentralForce(forward.negate().mult(ENGINE_FORCE * 0.6f));
-            }
+            Vector3f brakeDirection = signedSpeed >= 0f ? forward.negate() : forward;
+            carBody.applyCentralForce(brakeDirection.mult(BRAKE_FORCE));
         }
 
-        if (!state.isAccelerating() && !state.isBraking()) {
+        if (!state.isAccelerating() && !state.isReversing() && !state.isBraking()) {
             Vector3f vel = carBody.getLinearVelocity();
             carBody.setLinearVelocity(new Vector3f(vel.x * 0.995f, vel.y, vel.z * 0.995f));
         }
 
-        if (Math.abs(speedKmh) > 2f) {
+        if (Math.abs(signedSpeed) > 2f) {
             float steer = 0f;
             if (state.isSteerLeft()) steer += 1f;
             if (state.isSteerRight()) steer -= 1f;
             if (steer != 0f) {
-                float speedFactor = FastMath.clamp(speedKmh / GameConfig.MAX_FORWARD_SPEED, 0.25f, 1f);
-                carBody.applyTorque(new Vector3f(0f, TURN_TORQUE * steer * speedFactor, 0f));
+                float speedFactor = FastMath.clamp(Math.abs(signedSpeed) / GameConfig.MAX_FORWARD_SPEED, 0.25f, 1f);
+                float reverseFactor = signedSpeed < 0f ? -1f : 1f;
+                carBody.applyTorque(new Vector3f(0f, TURN_TORQUE * steer * speedFactor * reverseFactor, 0f));
             }
         }
     }
