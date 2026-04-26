@@ -41,12 +41,12 @@
         </dependency>
         <dependency>
             <groupId>org.jmonkeyengine</groupId>
-            <artifactId>jme3-bullet</artifactId>
+            <artifactId>jme3-jbullet</artifactId>
             <version>${jme.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jmonkeyengine</groupId>
-            <artifactId>jme3-bullet-native</artifactId>
+            <artifactId>jme3-jbullet-native</artifactId>
             <version>${jme.version}</version>
         </dependency>
     </dependencies>
