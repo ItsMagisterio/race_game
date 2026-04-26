@@ -20,7 +20,7 @@ public class CarService {
         try {
             carModel = assetManager.loadModel("bmw_racing_car.glb");
             carModel.setLocalScale(1f);
-            carModel.rotate(0f, -FastMath.HALF_PI, 0f);
+            carModel.rotate(0f, FastMath.HALF_PI, 0f);
         } catch (Exception ex) {
             Geometry fallbackCar = new Geometry("fallback-car", new Box(1.2f, 0.6f, 2.4f));
             Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
