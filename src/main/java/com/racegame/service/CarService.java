@@ -47,7 +47,7 @@ public class CarService {
 
         carBody = new RigidBodyControl(new BoxCollisionShape(new Vector3f(1.0f, 0.55f, 2.2f)), CAR_MASS);
         carBody.setDamping(0.2f, 0.85f);
-        carBody.setAngularFactor(new Vector3f(0f, 1f, 0f));
+        carBody.setAngularFactor(0.35f);
         carNode.addControl(carBody);
         physicsSpace.add(carBody);
 
