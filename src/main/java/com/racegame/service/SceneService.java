@@ -5,6 +5,7 @@ import com.jme3.asset.plugins.FileLocator;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.MatParam;
@@ -26,6 +27,34 @@ public class SceneService {
         assetManager.registerLocator(".", FileLocator.class);
         addLights(rootNode);
         loadTrackWithPhysics(assetManager, rootNode, physicsSpace);
+    }
+
+
+    public Vector3f findSpawnPoint(PhysicsSpace physicsSpace) {
+        Vector3f[] candidates = new Vector3f[]{
+                new Vector3f(0f, 120f, 0f),
+                new Vector3f(25f, 120f, 25f),
+                new Vector3f(-25f, 120f, -25f),
+                new Vector3f(40f, 120f, -40f),
+                new Vector3f(-40f, 120f, 40f)
+        };
+
+        for (Vector3f from : candidates) {
+            Vector3f to = from.add(0f, -260f, 0f);
+            PhysicsRayTestResult best = null;
+            for (PhysicsRayTestResult hit : physicsSpace.rayTest(from, to)) {
+                if (best == null || hit.getHitFraction() < best.getHitFraction()) {
+                    best = hit;
+                }
+            }
+
+            if (best != null && best.getHitNormalLocal() != null && best.getHitNormalLocal().y > 0.92f) {
+                Vector3f point = from.interpolateLocal(to, best.getHitFraction());
+                return point.add(0f, 2.6f, 0f);
+            }
+        }
+
+        return new Vector3f(0f, 8f, 0f);
     }
 
     private void addLights(Node rootNode) {
@@ -85,6 +114,7 @@ public class SceneService {
 
         MatParam baseMapParam = original.getParam("BaseColorMap");
         if (baseMapParam != null && baseMapParam.getValue() instanceof Texture texture) {
+            texture.setAnisotropicFilter(8);
             lit.setTexture("DiffuseMap", texture);
         }
 

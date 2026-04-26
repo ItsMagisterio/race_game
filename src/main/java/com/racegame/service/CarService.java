@@ -57,6 +57,13 @@ public class CarService {
         return carNode;
     }
 
+    public void spawnAt(Vector3f worldPosition) {
+        if (carBody == null) return;
+        carBody.setPhysicsLocation(worldPosition);
+        carBody.setLinearVelocity(Vector3f.ZERO);
+        carBody.setAngularVelocity(Vector3f.ZERO);
+    }
+
     public void updateSpeed(CarState state, float tpf) {
         if (carBody == null) {
             state.setSpeedKmh(0f);

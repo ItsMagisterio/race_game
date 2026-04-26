@@ -39,6 +39,7 @@ public class RaceGameApp extends SimpleApplication {
         settings.setResolution((int) screen.getWidth(), (int) screen.getHeight());
         settings.setFullscreen(false);
         settings.setTitle("Race Game");
+        settings.setSamples(4);
 
         app.setSettings(settings);
         app.setShowSettings(false);
@@ -58,6 +59,7 @@ public class RaceGameApp extends SimpleApplication {
 
         cam.setFrustumFar(5000f);
         carNode = carService.createCar(assetManager, rootNode, bulletAppState.getPhysicsSpace());
+        carService.spawnAt(sceneService.findSpawnPoint(bulletAppState.getPhysicsSpace()));
         nicknameService.attachNickname(assetManager, carNode, "RACER_01");
 
         InputService inputService = new InputService(carState);
